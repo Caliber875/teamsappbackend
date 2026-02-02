@@ -24,11 +24,24 @@ class SocketService {
 
         this.io = new Server(httpServer, {
             cors: {
-                origin: process.env.CLIENT_URL || "http://localhost:3000",
+                origin: [
+                    process.env.CLIENT_URL || "http://localhost:3000",
+                    "https://orbit-teams.vercel.app",
+                    "https://newteamsapp-af3r.vercel.app", // Legacy just in case
+                    "http://localhost:3000"
+                ].filter(Boolean) as string[],
                 credentials: true,
                 methods: ["GET", "POST"]
             }
         });
+
+        console.log('🔵 [SocketService] Initialized with CORS origins:',
+            [
+                process.env.CLIENT_URL,
+                "https://orbit-teams.vercel.app",
+                "https://newteamsapp-af3r.vercel.app"
+            ]
+        );
 
         // Initialize Redis Adapter
         const redisUrl = process.env.REDIS_URL;

@@ -24,7 +24,12 @@ export const socketAuthMiddleware = (socket: Socket, next: (err?: ExtendedError)
     const cookies = parseCookies(cookieString);
     const token = cookies.auth_token;
 
+    console.log(`🔌 [Socket Auth] Checking connection for socket ${socket.id}`);
+    console.log(`🔌 [Socket Auth] Cookies present: ${!!cookieString}`);
+    console.log(`🔌 [Socket Auth] Auth token present: ${!!token}`);
+
     if (!token) {
+        console.error('❌ [Socket Auth] No token found in cookies');
         return next(new Error('Authentication error: Token missing'));
     }
 
@@ -32,12 +37,15 @@ export const socketAuthMiddleware = (socket: Socket, next: (err?: ExtendedError)
         const decoded = AuthService.verifyToken(token);
 
         if (!decoded) {
+            console.error('❌ [Socket Auth] Token verification failed');
             return next(new Error('Authentication error: Invalid token'));
         }
 
         authSocket.user = decoded;
+        console.log(`✅ [Socket Auth] Authenticated user: ${decoded.id}`);
         next();
     } catch (err) {
+        console.error('❌ [Socket Auth] Exception during verify:', err);
         return next(new Error('Authentication error: Invalid token'));
     }
 };
