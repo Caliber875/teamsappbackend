@@ -46,16 +46,9 @@ const DirectMessageSchema: Schema = new Schema(
     { timestamps: true }
 );
 
-// Unique index on participants to prevent duplicate DMs
-// We'll sort participant IDs before saving to ensure [A,B] === [B,A]
-DirectMessageSchema.index(
-    { 'participants.userId': 1 },
-    {
-        unique: true,
-        // This creates a compound index on both participant IDs
-        // MongoDB will enforce uniqueness on the sorted array
-    }
-);
+// REMOVED: Unique index on 'participants.userId' which was incorrect.
+// It enforced that a user could only be in ONE DM globally.
+// We handle DM uniqueness (pair of users) in the service layer using logic.
 
 // Index for querying user's DMs, sorted by most recent activity
 DirectMessageSchema.index({ 'participants.userId': 1, updatedAt: -1 });
