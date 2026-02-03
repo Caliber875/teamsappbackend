@@ -22,14 +22,16 @@ export const socketAuthMiddleware = (socket: Socket, next: (err?: ExtendedError)
     const authSocket = socket as AuthSocket;
     const cookieString = socket.request.headers.cookie || '';
     const cookies = parseCookies(cookieString);
-    const token = cookies.auth_token;
+
+    // Check for token in Cookies OR Handshake Auth (for Ticket-based auth)
+    const token = cookies.auth_token || socket.handshake.auth?.token;
 
     console.log(`🔌 [Socket Auth] Checking connection for socket ${socket.id}`);
     console.log(`🔌 [Socket Auth] Cookies present: ${!!cookieString}`);
-    console.log(`🔌 [Socket Auth] Auth token present: ${!!token}`);
+    console.log(`🔌 [Socket Auth] Handshake Auth Token present: ${!!socket.handshake.auth?.token}`);
 
     if (!token) {
-        console.error('❌ [Socket Auth] No token found in cookies');
+        console.error('❌ [Socket Auth] No token found in cookies or handshake');
         return next(new Error('Authentication error: Token missing'));
     }
 

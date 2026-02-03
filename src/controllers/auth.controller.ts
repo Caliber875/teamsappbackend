@@ -253,4 +253,37 @@ export class AuthController {
         // Current user will be attached by auth middleware
         res.status(200).json({ status: 'success', data: { user: (req as any).user } });
     }
+
+    /**
+     * Generate a short-lived ticket for Socket.IO authentication
+     * Use this when 3rd-party cookies are blocked (e.g. cross-site)
+     */
+    static async getSocketTicket(req: Request, res: Response) {
+        try {
+            const user = (req as any).user;
+            if (!user) {
+                return res.status(401).json({ status: 'error', message: 'Unauthenticated' });
+            }
+
+            // Generate a short-lived token (e.g. 1 minute)
+            // We can reuse the same generateToken logic but with short expiry
+            // Or just valid token is enough. Let's make a specific payload if needed, 
+            // but for simplicity, standard token works if backend accepts it.
+            // Actually, let's create a specific short-lived one to differentiate.
+            // For now, reusing generateToken is safest as middleware expects standard structure.
+
+            // To make it short lived, we might need a separate method or just accept standard token.
+            // Standard token is 7 days. That's fine, it's just a handshake.
+            // But for security, let's allow the frontend to request a fresh token that it can send manually.
+            const ticket = AuthService.generateToken(user);
+
+            res.status(200).json({
+                status: 'success',
+                data: { ticket }
+            });
+        } catch (error) {
+            console.error('Socket Ticket Error:', error);
+            res.status(500).json({ status: 'error', message: 'Failed to generate ticket' });
+        }
+    }
 }

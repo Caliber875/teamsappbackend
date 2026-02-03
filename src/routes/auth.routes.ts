@@ -28,5 +28,6 @@ router.get(
 // Session Routes
 router.get('/me', authMiddleware, AuthController.me);
 router.post('/logout', authMiddleware, AuthController.logout);
+router.get('/socket-ticket', authMiddleware, AuthController.getSocketTicket);
 
 export default router;
